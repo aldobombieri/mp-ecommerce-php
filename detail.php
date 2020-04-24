@@ -1,3 +1,71 @@
+<?php
+    // SDK de Mercado Pago
+    require __DIR__ .  '/vendor/autoload.php';
+
+    // Agrega credenciales
+    MercadoPago\SDK::setAccessToken('APP_USR-144108273911882-042419-1dbcaab661841148058a6f1f1249d756-469485398');
+
+    // Crea un objeto de preferencia
+    $preference = new MercadoPago\Preference();
+
+    $payer = new MercadoPago\Payer();
+    $payer->name = "Lalo";
+    $payer->surname = "Landa";
+    $payer->email = "test_user_63274575@testuser.com";
+    $payer->phone = array(
+        "area_code" => "011",
+        "number" => "22223333"
+    );
+    
+    $payer->identification = array(
+        "type" => "DNI",
+        "number" => "22333444"
+    );
+    
+    $payer->address = array(
+        "street_name" => "Falsa",
+        "street_number" => 123,
+        "zip_code" => "1111"
+    );
+
+    $preference->payer = $payer;
+
+    $preference->back_urls = array(
+        "success" => "https://aldobombieri-mp-ecommerce-php.herokuapp.com//success.php",
+        "failure" => "https://aldobombieri-mp-ecommerce-php.herokuapp.com//failure.php",
+        "pending" => "https://aldobombieri-mp-ecommerce-php.herokuapp.com//pending.php"
+    );
+
+    $preference->auto_return = "approved";
+
+    $preference->external_reference = "ABCD1234";
+
+    $preference->notification_url = "https://aldobombieri-mp-ecommerce-php.herokuapp.com//ipn.php";
+
+    $preference->payment_methods = array(
+        "excluded_payment_methods" => array(
+            array("id" => "amex")
+        ),
+        "excluded_payment_types" => array(
+            array("id" => "atm")
+        ),
+        "installments" => 6
+    );
+
+    $image_url = 'https://aldobombieri-mp-ecommerce-php.herokuapp.com/' . trim($_POST['img'], '.');
+
+    // Crea un ítem en la preferencia
+    $item = new MercadoPago\Item();
+    $item->id = 1234;
+    $item->title = $_POST['title'];
+    $item->quantity = $_POST['unit'];
+    $item->unit_price = $_POST['price'];
+    $item->picture_url = $image_url;
+    $preference->items = array($item);
+
+    $preference->save();
+?>
+
 <!DOCTYPE html>
 <html class="supports-animation supports-columns svg no-touch no-ie no-oldie no-ios supports-backdrop-filter as-mouseuser" lang="en-US"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
@@ -130,7 +198,9 @@
                                             <?php echo "$" . $_POST['unit'] ?>
                                         </h3>
                                     </div>
-                                    <button type="submit" class="mercadopago-button" formmethod="post">Pagar</button>
+                                    <form action="/result.php" method="POST">
+                                        <script src="https://www.mercadopago.com.ar/integrations/v1/web-payment-checkout.js" data-header-color="#2D3277" data-elements-color="#2D3277" data-button-label="Pagar la compra" data-preference-id="<?php echo $preference->id; ?>"></script>
+                                    </form>
                                 </div>
                             </div>
                         </div>
